@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 
+import java.io.IOException;
+
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -63,6 +65,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
                 .body(ex.getMessage());
+    }
+
+
+    @ExceptionHandler(IOException.class)
+    public ResponseEntity<String> handelIOException(IOException ex) {
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("File processing error occurred.");
     }
 
 }

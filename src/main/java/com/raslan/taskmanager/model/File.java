@@ -3,6 +3,7 @@ package com.raslan.taskmanager.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -40,6 +41,7 @@ public class File{
     @JoinColumn(name="user_id",  nullable = true)
     private User uploadedBy;
 
+    @CreationTimestamp
     private LocalDateTime uploadedAt;
 
     @PrePersist
