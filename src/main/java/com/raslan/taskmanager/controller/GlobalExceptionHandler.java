@@ -1,19 +1,22 @@
 package com.raslan.taskmanager.controller;
 
 import com.raslan.taskmanager.exception.BadRequestException;
+import com.raslan.taskmanager.exception.ConflictException;
 import com.raslan.taskmanager.exception.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.io.IOException;
 
 
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
@@ -54,13 +57,13 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<String> handelRuntimeException(BadRequestException ex) {
+    public ResponseEntity<String> handelBadRequestException(BadRequestException ex) {
         return ResponseEntity
                 .badRequest()
                 .body(ex.getMessage());
     }
 
-    @ExceptionHandler(BadRequestException.class)
+    @ExceptionHandler(ConflictException.class)
     public ResponseEntity<String> handelConflictException(BadRequestException ex) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
@@ -75,4 +78,17 @@ public class GlobalExceptionHandler {
                 .body("File processing error occurred.");
     }
 
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<String> handleBadCredentialsException(BadCredentialsException ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body("Email or password incorrect");
+    }
+
+    @ExceptionHandler(DisabledException.class)
+    public ResponseEntity<String> handleDisabledException(DisabledException ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body("Account not verified");
+    }
 }

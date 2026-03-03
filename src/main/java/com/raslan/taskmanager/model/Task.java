@@ -20,6 +20,7 @@ import java.util.List;
                                 @Index(name="idx_status", columnList = "status")
 }
 )
+
 public class Task {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
@@ -37,7 +38,6 @@ public class Task {
     private LocalDateTime createdAt;
     private LocalDateTime finishedAt;
     private LocalDateTime deadline;
-
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="created_by", nullable=true)

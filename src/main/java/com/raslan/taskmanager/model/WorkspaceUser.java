@@ -47,4 +47,5 @@ public class WorkspaceUser {
 
 
     private LocalDateTime joinedAt;
+
 }

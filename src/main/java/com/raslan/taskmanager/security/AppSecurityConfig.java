@@ -38,9 +38,10 @@ public class AppSecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .oauth2Login(oauth -> oauth.disable())   // ✅ KEY FIX
-                .formLogin(form -> form.disable())       // ✅ Good practice
+                .oauth2Login(oauth -> oauth.disable())
+                .formLogin(form -> form.disable())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/auth/logout").authenticated()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()

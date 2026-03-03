@@ -12,6 +12,7 @@ import com.raslan.taskmanager.repository.UserRepository;
 import com.raslan.taskmanager.enums.Role;
 import com.raslan.taskmanager.enums.TokenType;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,11 @@ import java.util.UUID;
 
 @Service
 public class AuthService {
+
+    @Value("${jwt.refresh-expiration}")
+    private Duration refreshTokenExpiration;
+
+
     private final UserRepository userRepo;
     private final PasswordEncoder passwordEncoder;
     private final TokenRepository tokenRepo;
@@ -90,7 +96,7 @@ public class AuthService {
         tokenRepo.deleteByUserAndTokenType(user, tokenType);
 
         String tokenStr = UUID.randomUUID().toString();
-        Token token =  new Token(tokenStr, TokenType.VERIFY_EMAIL, LocalDateTime.now().plus(duration), user);
+        Token token =  new Token(tokenStr, tokenType, LocalDateTime.now().plus(duration), user);
         tokenRepo.save(token);
 
         return tokenStr;
@@ -106,5 +112,34 @@ public class AuthService {
             }
         }
 
+    }
+
+
+    @Transactional
+    public String createRefreshToken(Long userId) {
+        User user  = userRepo.findById(userId).orElseThrow(() -> new BadRequestException("User not found"));
+        String token = generateToken(user, TokenType.REFRESH,  refreshTokenExpiration);
+
+        return token;
+    }
+
+    public Token validateRefreshToken(String token) {
+        Token refreshToken = tokenRepo.findByToken(token).orElseThrow(() -> new BadRequestException("Invalid Token"));
+        if(!refreshToken.getTokenType().equals(TokenType.REFRESH))
+            throw new BadRequestException("Invalid Token");
+
+        if(refreshToken.getExpiryDate().isBefore(LocalDateTime.now())){
+            tokenRepo.delete(refreshToken);
+            throw new BadRequestException("Token expired");
+        }
+
+        return refreshToken;
+    }
+
+    @Transactional
+    public void deleteRefreshTokens(Long userId) {
+        User user = userRepo.findById(userId).orElseThrow(() -> new BadRequestException("User not found"));
+
+        tokenRepo.deleteByUserAndTokenType(user, TokenType.REFRESH);
     }
 }

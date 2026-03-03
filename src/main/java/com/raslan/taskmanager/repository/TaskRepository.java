@@ -13,9 +13,9 @@ public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificat
 
 
     @Query("""
-            select t from task t
+            select t from Task t
             where t.id = :id
-            and (t.assignedTo.id = :userId or t.createdVy.id = :userId)
+            and (t.assignedTo.id = :userId or t.createdBy.id = :userId)
             """)
     public Optional<Task> findByIdAndAssignedToIdOrCreatedById(Long id, Long userId);
     public Optional<Task> findByIdAndAssignedToId(Long id, Long userId);

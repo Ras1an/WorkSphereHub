@@ -2,16 +2,17 @@ package com.raslan.taskmanager.controller;
 
 
 import com.raslan.taskmanager.dto.Auth.*;
+import com.raslan.taskmanager.model.Token;
+import com.raslan.taskmanager.model.User;
 import com.raslan.taskmanager.service.AuthService;
 import com.raslan.taskmanager.service.JwtService;
 import com.raslan.taskmanager.security.UserPrincipal;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -30,20 +31,12 @@ public class AuthController {
 
     @PostMapping("login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest loginRequest) {
-        Authentication auth;
-        try {
-        auth =  authManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.email, loginRequest.password));
-    }
-    catch (DisabledException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new AuthResponse("Account not verified"));
-        }
-    catch (BadCredentialsException e) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new AuthResponse("email or password incorrect"));
-    }
+    Authentication auth =  authManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.email, loginRequest.password));
     UserPrincipal user = (UserPrincipal) auth.getPrincipal();
-    String token = jwtService.generateToken(user.getEmail(), user.getId());
-    return new ResponseEntity<>(new AuthResponse(token), HttpStatus.OK);
+    String accessToken = jwtService.generateToken(user.getEmail(), user.getId());
+    String refreshToken = authService.createRefreshToken(user.getId());
+
+    return new ResponseEntity<>(new AuthResponse(accessToken, refreshToken), HttpStatus.OK);
     }
 
     @PostMapping("register")
@@ -73,6 +66,26 @@ public class AuthController {
     public ResponseEntity<String> confirmResetPassword(@RequestBody ResetPasswordDto resetPasswordDto){
         authService.confirmResetPassword(resetPasswordDto);
         return ResponseEntity.ok("Password Reset successfully");
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refresh(@RequestBody RefreshTokenRequest request){
+        Token oldRefreshToken = authService.validateRefreshToken(request.refreshToken());
+
+        User user = oldRefreshToken.getUser();
+
+        String newAccessToken = jwtService.generateToken(user.getEmail(), user.getId());
+
+        String newRefreshToken = authService.createRefreshToken(user.getId());
+
+        return ResponseEntity.ok(new AuthResponse(newAccessToken, newRefreshToken));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(@AuthenticationPrincipal UserPrincipal user){
+        authService.deleteRefreshTokens(user.getId());
+        return ResponseEntity.ok("Logout Successfully");
+
     }
 
 
