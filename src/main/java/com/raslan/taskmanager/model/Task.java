@@ -5,6 +5,7 @@ import com.raslan.taskmanager.enums.TaskStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,6 +22,10 @@ import java.util.List;
 }
 )
 
+@SQLRestriction("""
+        deletedAt is null
+        and workspace_id in (select w.id from workspaces w where w.deletedAt is null)
+        """)
 public class Task {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
@@ -38,6 +43,7 @@ public class Task {
     private LocalDateTime createdAt;
     private LocalDateTime finishedAt;
     private LocalDateTime deadline;
+    private LocalDateTime deletedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="created_by", nullable=true)

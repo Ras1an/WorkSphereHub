@@ -5,6 +5,7 @@ import com.raslan.taskmanager.enums.WorkspaceUserRole;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 
@@ -18,6 +19,7 @@ import java.time.LocalDateTime;
         uniqueConstraints = @UniqueConstraint(columnNames={"workspace_id", "user_id"}),
         indexes = @Index(name="idx_workspace_user", columnList = "workspace_id, user_id")
 )
+@SQLRestriction("deletedAt is null")
 public class WorkspaceUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,4 +50,5 @@ public class WorkspaceUser {
 
     private LocalDateTime joinedAt;
 
+    private LocalDateTime deletedAt;
 }

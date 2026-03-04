@@ -4,10 +4,7 @@ import com.raslan.taskmanager.dto.Task.CreateTaskDto;
 import com.raslan.taskmanager.dto.Task.ReturnTaskDto;
 import com.raslan.taskmanager.dto.Task.TaskFilter;
 import com.raslan.taskmanager.dto.Task.UpdateTaskDto;
-import com.raslan.taskmanager.enums.MembershipStatus;
-import com.raslan.taskmanager.enums.SortingDirection;
-import com.raslan.taskmanager.enums.TaskStatus;
-import com.raslan.taskmanager.enums.WorkspaceUserRole;
+import com.raslan.taskmanager.enums.*;
 import com.raslan.taskmanager.exception.BadRequestException;
 import com.raslan.taskmanager.exception.ResourceNotFoundException;
 import com.raslan.taskmanager.model.Task;
@@ -53,7 +50,7 @@ public class TaskService {
     @Transactional
     public ReturnTaskDto createTask(Long userId, CreateTaskDto dto){
         User creator = getUser(userId);
-        Workspace workspace = getWorkspace(userId);
+        Workspace workspace = getWorkspace(dto.getWorkspaceId());
         User assignee = resolveAssignee(creator, dto.getAssignedToId());
 
         validateTaskCreationPermission(creator, assignee, workspace);
@@ -77,7 +74,7 @@ public class TaskService {
     }
     @Transactional
     public ReturnTaskDto updateTaskStatus(Long taskId, Long userId, TaskStatus status) {
-        Task task = taskRepo.findByIdAndAssignedToId(taskId, userId).orElseThrow(() -> new ResourceNotFoundException("Task not found"));
+        Task task = taskRepo.findByIdAndAssignedToIdOrCreatedById(taskId, userId).orElseThrow(() -> new ResourceNotFoundException("Task not found"));
         task.setStatus(status);
 
         return toReturnTaskDto(task);
@@ -85,7 +82,7 @@ public class TaskService {
     @Transactional
     public void deleteTask(Long id, Long useId){
         Task task = taskRepo.findTasksByIdAndCreatedById(id,  useId).orElseThrow(() -> new ResourceNotFoundException("Task not found"));
-        taskRepo.delete(task);
+        task.setDeletedAt(LocalDateTime.now());
     }
     private ReturnTaskDto toReturnTaskDto(Task task){
         return ReturnTaskDto.builder().id(task.getId())
@@ -151,6 +148,9 @@ public class TaskService {
     }
 
     private void validateTaskCreationPermission(User creator, User assignee, Workspace workspace){
+        if(!workspace.getStatus().equals(WorkspaceStatus.ACTIVE))
+            throw new AccessDeniedException("Workspace is not active");
+
         boolean creatorIsMember = workspaceUserRepo.existsByUserIdAndWorkspaceIdAndStatus(
                 creator.getId(),
                 workspace.getId(),
@@ -197,6 +197,7 @@ public class TaskService {
                 .createdBy(creator)
                 .assignedTo(assignee)
                 .workspace(workspace)
+                .deadline(dto.getDeadline())
                 .build();
     }
 }

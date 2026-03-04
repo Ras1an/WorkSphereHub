@@ -133,7 +133,7 @@ public class WorkspaceService {
     @Transactional
     public void deleteWorkspace(Long workspaceId, Long userId){
         Workspace workspace = workspaceRepo.findByIdAndOwnerId(workspaceId, userId).orElseThrow(() -> new ResourceNotFoundException("Something went wrong"));
-        workspaceRepo.delete(workspace);
+        workspace.setDeletedAt(LocalDateTime.now());
     }
 
     @Transactional
@@ -227,6 +227,7 @@ public class WorkspaceService {
             throw new AccessDeniedException("You are not even in that workspace");
 
         membership.setStatus(MembershipStatus.REMOVED);
+        membership.setDeletedAt(LocalDateTime.now());
     }
 
     @Transactional
@@ -245,6 +246,7 @@ public class WorkspaceService {
            throw new BadRequestException("You can not fire workspace owner");
 
         membership.setStatus(MembershipStatus.REMOVED);
+        membership.setDeletedAt(LocalDateTime.now());
     }
 
     public void uploadFile(){

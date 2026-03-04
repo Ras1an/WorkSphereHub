@@ -3,6 +3,7 @@ package com.raslan.taskmanager.controller;
 import com.raslan.taskmanager.dto.Task.*;
 import com.raslan.taskmanager.security.UserPrincipal;
 import com.raslan.taskmanager.service.TaskService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,7 +20,7 @@ public class TaskController {
 
 
     @GetMapping
-    public ResponseEntity<Page<ReturnTaskDto>> getAllTasks(@RequestParam TaskFilter filter, @AuthenticationPrincipal UserPrincipal user){
+    public ResponseEntity<Page<ReturnTaskDto>> getTasks(@ModelAttribute TaskFilter filter, @AuthenticationPrincipal UserPrincipal user){
         return ResponseEntity.ok(taskService.getTasks(user.getId(), filter));
     }
 
@@ -30,10 +31,8 @@ public class TaskController {
     }
 
 
-
-
     @PostMapping
-    public ResponseEntity<ReturnTaskDto> createTask(@RequestBody CreateTaskDto task, @AuthenticationPrincipal UserPrincipal user){
+    public ResponseEntity<ReturnTaskDto> createTask(@Valid @RequestBody CreateTaskDto task, @AuthenticationPrincipal UserPrincipal user){
         return ResponseEntity.ok(taskService.createTask(user.getId(), task));
     }
 
@@ -44,7 +43,7 @@ public class TaskController {
     }
 
 
-    @PatchMapping("/done/{id}")
+    @PatchMapping("/status/{id}")
     public ResponseEntity<ReturnTaskDto> updateTaskStatus(@PathVariable("id") Long taskId, @RequestBody UpdateTaskStatusDto dto, @AuthenticationPrincipal UserPrincipal user){
         return ResponseEntity.ok(taskService.updateTaskStatus(taskId, user.getId(), dto.getStatus()));
     }

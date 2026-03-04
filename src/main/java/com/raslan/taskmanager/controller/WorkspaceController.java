@@ -23,7 +23,7 @@ public class WorkspaceController {
 
     @GetMapping
     public ResponseEntity<Page<ReturnWorkspaceDto>>  getUserWorkspaces(
-            @RequestParam WorkspaceFilter filter,
+            @ModelAttribute WorkspaceFilter filter,
             @AuthenticationPrincipal UserPrincipal user
     ) {
         return ResponseEntity.ok(workspaceService.getAllWorkspaces(filter, user.getId()));

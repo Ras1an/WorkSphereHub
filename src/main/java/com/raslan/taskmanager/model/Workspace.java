@@ -4,6 +4,7 @@ import com.raslan.taskmanager.enums.WorkspaceStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name="workspaces", indexes = @Index(name="idx_code", columnList = "code"))
+@SQLRestriction("deletedAt is null")
 public class Workspace {
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
@@ -30,6 +32,7 @@ public class Workspace {
     private LocalDateTime createdAt;
     private LocalDateTime finishedAt;
     private LocalDateTime deadline;
+    private LocalDateTime deletedAt;
 
     @OneToMany(mappedBy = "workspace", cascade = CascadeType.ALL,orphanRemoval = true,fetch = FetchType.LAZY)
     private List<Task> tasks;
