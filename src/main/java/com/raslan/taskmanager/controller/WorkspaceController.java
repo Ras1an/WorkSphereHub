@@ -1,5 +1,6 @@
 package com.raslan.taskmanager.controller;
 
+import com.raslan.taskmanager.dto.GeneralResponse;
 import com.raslan.taskmanager.dto.User.AddMemberDto;
 import com.raslan.taskmanager.dto.User.FireUserDto;
 import com.raslan.taskmanager.dto.Workspace.*;
@@ -45,46 +46,46 @@ public class WorkspaceController {
     }
 
     @DeleteMapping("/{workspaceId}")
-    public ResponseEntity<String> deleteWorkspace(@PathVariable Long workspaceId, @AuthenticationPrincipal UserPrincipal user) {
+    public ResponseEntity<Void> deleteWorkspace(@PathVariable Long workspaceId, @AuthenticationPrincipal UserPrincipal user) {
         workspaceService.deleteWorkspace(workspaceId, user.getId());
-        return  ResponseEntity.ok("Workspace has been deleted");
+        return  ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{workspaceId}/members")
-    public ResponseEntity<String> inviteMember(@PathVariable Long workspaceId, @Valid @RequestBody AddMemberDto dto, @AuthenticationPrincipal UserPrincipal user) {
+    public ResponseEntity<GeneralResponse> inviteMember(@PathVariable Long workspaceId, @Valid @RequestBody AddMemberDto dto, @AuthenticationPrincipal UserPrincipal user) {
         workspaceService.inviteMemberToWorkspace(workspaceId, user.getId(), dto.getInvitedUserEmail(), dto.getRole());
-        return ResponseEntity.ok("Member has been invited");
+        return ResponseEntity.ok(new GeneralResponse("Member has been invited"));
     }
 
     @PutMapping("/{workspaceId}/members/accept")
-    public ResponseEntity<String> acceptInvitation(@PathVariable Long workspaceId, @AuthenticationPrincipal UserPrincipal user) {
+    public ResponseEntity<GeneralResponse> acceptInvitation(@PathVariable Long workspaceId, @AuthenticationPrincipal UserPrincipal user) {
         workspaceService.updateMembershipStatus(workspaceId, user.getId(), MembershipStatus.ACCEPTED);
-        return ResponseEntity.ok("Membership has been accepted");
+        return ResponseEntity.ok(new GeneralResponse("Membership has been accepted"));
     }
 
     @PutMapping("/{workspaceId}/members/reject")
-    public ResponseEntity<String> rejectInvitation(@PathVariable Long workspaceId, @AuthenticationPrincipal UserPrincipal user) {
+    public ResponseEntity<GeneralResponse> rejectInvitation(@PathVariable Long workspaceId, @AuthenticationPrincipal UserPrincipal user) {
         workspaceService.updateMembershipStatus(workspaceId, user.getId(), MembershipStatus.REJECTED);
-        return ResponseEntity.ok("Membership has been rejected");
+        return ResponseEntity.ok(new GeneralResponse("Membership has been rejected"));
     }
 
     @PostMapping("/join")
-    public ResponseEntity<String> joinWorkspaceByCode(@Valid @RequestBody JoinWorkspaceDto dto, @AuthenticationPrincipal UserPrincipal user) {
+    public ResponseEntity<GeneralResponse> joinWorkspaceByCode(@Valid @RequestBody JoinWorkspaceDto dto, @AuthenticationPrincipal UserPrincipal user) {
         workspaceService.joinWorkspaceByCode(user.getId(),  dto.getCode());
-        return ResponseEntity.ok("Workspace has been joined");
+        return ResponseEntity.ok(new GeneralResponse("Workspace has been joined"));
     }
 
     @PatchMapping("{workspaceId}/members/fire")
-    public ResponseEntity<String> fireWorkspaceUser(@PathVariable Long workspaceId, @Valid @RequestBody FireUserDto firedUserDto, @AuthenticationPrincipal UserPrincipal user) {
+    public ResponseEntity<GeneralResponse> fireWorkspaceUser(@PathVariable Long workspaceId, @Valid @RequestBody FireUserDto firedUserDto, @AuthenticationPrincipal UserPrincipal user) {
         workspaceService.fireUser(user.getId(), firedUserDto.getUserId(), workspaceId);
-        return ResponseEntity.ok("User has been fired");
+        return ResponseEntity.ok(new GeneralResponse("User has been fired"));
     }
 
 
     @PatchMapping("{workspaceId}/members/leave")
-    public ResponseEntity<String> leaveWorkspace(@PathVariable Long workspaceId, @AuthenticationPrincipal UserPrincipal user) {
+    public ResponseEntity<GeneralResponse> leaveWorkspace(@PathVariable Long workspaceId, @AuthenticationPrincipal UserPrincipal user) {
         workspaceService.leaveWorkspace(user.getId(), workspaceId);
 
-        return  ResponseEntity.ok("Workspace has been leaved");
+        return  ResponseEntity.ok(new GeneralResponse("Workspace has been leaved"));
     }
 }

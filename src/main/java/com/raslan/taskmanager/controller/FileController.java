@@ -2,6 +2,7 @@ package com.raslan.taskmanager.controller;
 
 import com.raslan.taskmanager.dto.File.FileDto;
 import com.raslan.taskmanager.dto.File.UpdateFileDto;
+import com.raslan.taskmanager.dto.GeneralResponse;
 import com.raslan.taskmanager.model.File;
 import com.raslan.taskmanager.security.UserPrincipal;
 import com.raslan.taskmanager.service.FileService;
@@ -77,8 +78,8 @@ public class FileController {
 
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteFile(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal user) {
+    public ResponseEntity<GeneralResponse> deleteFile(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal user) {
         fileService.deleteFile(id, user.getId());
-        return ResponseEntity.ok("File deleted");
+        return ResponseEntity.ok(new GeneralResponse("File deleted"));
     }
 }
