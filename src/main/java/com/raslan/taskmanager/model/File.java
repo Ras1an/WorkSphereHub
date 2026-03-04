@@ -4,6 +4,7 @@ package com.raslan.taskmanager.model;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -43,6 +44,9 @@ public class File{
 
     @CreationTimestamp
     private LocalDateTime uploadedAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
     @PrePersist
     @PreUpdate

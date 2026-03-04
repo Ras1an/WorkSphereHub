@@ -184,7 +184,7 @@ public class WorkspaceService {
         if(workspaceUser.getStatus() != MembershipStatus.PENDING)
             throw new BadRequestException("Invitation is not in pending state");
 
-
+        workspaceUser.setJoinedAt(LocalDateTime.now());
         workspaceUser.setStatus(status);
     }
 

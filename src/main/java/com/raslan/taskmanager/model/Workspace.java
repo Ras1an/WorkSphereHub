@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.SQLRestriction;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -33,6 +34,8 @@ public class Workspace {
     private LocalDateTime finishedAt;
     private LocalDateTime deadline;
     private LocalDateTime deletedAt;
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "workspace", cascade = CascadeType.ALL,orphanRemoval = true,fetch = FetchType.LAZY)
     private List<Task> tasks;
